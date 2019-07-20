@@ -128,7 +128,7 @@ func showRetroDialogMessage(w http.ResponseWriter, original slack.Message, title
 			Short: false,
 		},
 	}
-	original.Type = "textarea"
+
 	w.Header().Add("Content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(&original)

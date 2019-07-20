@@ -62,9 +62,7 @@ func (s *slackListener) handleMessageEvent(ev *slack.MessageEvent) error {
 	}
 
 	u := s.user.GetUserInfo(ev.Msg.User)
-	_, _, err := s.client.PostMessage(ev.Channel,
-		slack.MsgOptionAsUser(true),
-		slack.MsgOptionAttachments(retro.GetInitRetroMessage(u.Name)))
+	_, _, err := s.client.PostMessage(ev.Channel, retro.GetInitRetroMessage(u.Name)...)
 	if err != nil {
 		fmt.Printf("%s\n", err)
 	}
