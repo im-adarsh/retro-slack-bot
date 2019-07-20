@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"os"
 
+	handler2 "github.com/im-adarsh/retro-slack-bot/handler"
+	"github.com/im-adarsh/retro-slack-bot/listener"
+
 	"github.com/kelseyhightower/envconfig"
 	"github.com/nlopes/slack"
 )
@@ -37,17 +40,13 @@ func _main(args []string) int {
 	log.Printf("[INFO] Start slack event listening")
 	client := slack.New(env.BotToken)
 
-	slackListener := &SlackListener{
-		client: client,
-		botID:  env.BotID,
-	}
-	go slackListener.ListenAndResponse()
+	handler := handler2.New(client)
+	botListener := listener.New(client, env.BotID)
+	go botListener.ListenAndResponse()
 
 	// Register handler to receive interactive message
 	// responses from slack (kicked by user action)
-	http.HandleFunc("/interactive", interactionHandler{
-		slackClient: client,
-	}.EventListener)
+	http.HandleFunc("/interactive", handler.SelectOption)
 
 	log.Printf("[INFO] Server listening on :%s", env.Port)
 	if err := http.ListenAndServe(":"+env.Port, nil); err != nil {
