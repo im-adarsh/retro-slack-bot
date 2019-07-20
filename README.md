@@ -1,2 +1,1 @@
-# retro-bot
-golang based slack bot for retrospective meetings
+# Slack interactive message in Golang

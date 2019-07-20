@@ -6,9 +6,16 @@ import (
 	"github.com/nlopes/slack"
 )
 
-const INIT_CALLBACK_ID = "scrum-master-init-retro-selected-action"
+const (
+	INIT_RETRO_START        = "scrum-master-retro-action-start-retro"
+	INIT_RETRO_END          = "scrum-master-retro-action-end-retro"
+	INIT_RETRO_DISCARD      = "scrum-master-retro-action-discard-retro"
+	INIT_RETRO_SKIP         = "scrum-master-retro-action-skip-retro"
+	HISTORY_RETRO_SHOW_LAST = "scrum-master-retro-action-show-last-retro"
 
-const HISTORY_CALLBACK_ID = "scrum-master-history-retro-selected-action"
+	INIT_CALLBACK_ID    = "scrum-master-init-retro-selected-action"
+	HISTORY_CALLBACK_ID = "scrum-master-history-retro-selected-action"
+)
 
 func GetInitRetroMessage(username string) slack.Attachment {
 	return slack.Attachment{
@@ -17,10 +24,10 @@ func GetInitRetroMessage(username string) slack.Attachment {
 		Fallback:   "You are unable to choose an action",
 		CallbackID: INIT_CALLBACK_ID,
 		Actions: []slack.AttachmentAction{
-			{Name: "sprint", Text: "Start Retro", Type: "button", Value: "scrum-master-retro-action-start-retro", Style: "primary"},
-			{Name: "sprint", Text: "End Retro", Type: "button", Value: "scrum-master-retro-action-end-retro"},
-			{Name: "sprint", Text: "Discard Retro", Type: "button", Value: "scrum-master-retro-action-discard-retro", Style: "danger"},
-			{Name: "sprint", Text: "Skip Retro", Type: "button", Value: "scrum-master-retro-action-skip-retro"},
+			{Name: "sprint", Text: "Start Retro", Type: "button", Value: INIT_RETRO_START, Style: "primary"},
+			{Name: "sprint", Text: "End Retro", Type: "button", Value: INIT_RETRO_END},
+			{Name: "sprint", Text: "Discard Retro", Type: "button", Value: INIT_RETRO_DISCARD, Style: "danger"},
+			{Name: "sprint", Text: "Skip Retro", Type: "button", Value: INIT_RETRO_SKIP},
 		},
 	}
 }
@@ -31,7 +38,7 @@ func ShowRetroHistoryMessage(username string) slack.Attachment {
 		Fallback:   "You are unable to choose an action",
 		CallbackID: HISTORY_CALLBACK_ID,
 		Actions: []slack.AttachmentAction{
-			{Name: "sprint", Text: "Show Last Retro", Type: "button", Value: "scrum-master-retro-action-show-last-retro"},
+			{Name: "sprint", Text: "Show Last Retro", Type: "button", Value: HISTORY_RETRO_SHOW_LAST},
 		},
 	}
 }

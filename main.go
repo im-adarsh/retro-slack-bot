@@ -1,88 +1,58 @@
 package main
 
 import (
-	"fmt"
+	"log"
+	"net/http"
 	"os"
 
-	"github.com/im-adarsh/retro-slack-bot/messages/retro"
+	handler2 "github.com/im-adarsh/retro-slack-bot/handler"
+	"github.com/im-adarsh/retro-slack-bot/listener"
 
+	"github.com/kelseyhightower/envconfig"
 	"github.com/nlopes/slack"
 )
 
-var (
-	slackClient *slack.Client
-)
+// https://api.slack.com/slack-apps
+// https://api.slack.com/internal-integrations
+type envConfig struct {
+	// Port is server port to be listened.
+	Port string `envconfig:"PORT" default:"3000"`
+
+	// BotToken is bot user token to access to slack API.
+	BotToken string `envconfig:"BOT_TOKEN" required:"true"`
+
+	// BotID is bot user ID.
+	BotID string `envconfig:"BOT_ID" required:"true"`
+}
 
 func main() {
-	slackClient = slack.New(os.Getenv("SLACK_ACCESS_TOKEN"))
-	rtm := slackClient.NewRTM()
-	go rtm.ManageConnection()
+	os.Exit(_main(os.Args[1:]))
+}
 
-	for msg := range rtm.IncomingEvents {
-
-		switch ev := msg.Data.(type) {
-		case *slack.MessageEvent:
-			go handleMessage(ev)
-		case *slack.AttachmentAction:
-			go handleCallback(ev)
-
-		default:
-			fmt.Println()
-		}
+func _main(args []string) int {
+	var env envConfig
+	if err := envconfig.Process("", &env); err != nil {
+		log.Printf("[ERROR] Failed to process env var: %s", err)
+		return 1
 	}
-}
 
-func handleCallback(event *slack.AttachmentAction) {
-	fmt.Println(fmt.Sprintf("%v\n", event))
-	//logUserInfo(event.Value)
+	// Listening slack event and response
+	log.Printf("[INFO] Start slack event listening")
+	client := slack.New(env.BotToken)
 
-	go replyAck(event)
-}
+	handler := handler2.New(client)
+	botListener := listener.New(client, env.BotID)
+	go botListener.ListenAndResponse()
 
-func replyAck(ev *slack.AttachmentAction) {
-	_, _, err := slackClient.PostMessage(ev.Name,
-		slack.MsgOptionAsUser(true),
-		slack.MsgOptionAttachments(retro.GetRetroCallbackMessage(ev.Value)))
-	if err != nil {
-		fmt.Printf("%s\n", err)
-		return
+	// Register handler to receive interactive message
+	// responses from slack (kicked by user action)
+	http.HandleFunc("/interactive", handler.SelectOption)
+
+	log.Printf("[INFO] Server listening on :%s", env.Port)
+	if err := http.ListenAndServe(":"+env.Port, nil); err != nil {
+		log.Printf("[ERROR] %s", err)
+		return 1
 	}
-	return
-}
 
-func handleMessage(event *slack.MessageEvent) {
-	fmt.Println(fmt.Sprintf("%v\n", event))
-	if event.Msg.User == "ULNQ5BJ7Q" {
-		return
-	}
-	logUserInfo(event.Msg.User)
-	go replyEmpty(event)
-}
-
-func replyEmpty(ev *slack.MessageEvent) {
-
-	u := getUserInfo(ev.Msg.User)
-	_, _, err := slackClient.PostMessage(ev.Channel,
-		slack.MsgOptionAsUser(true),
-		slack.MsgOptionAttachments(retro.GetInitRetroMessage(u.Name), retro.ShowRetroHistoryMessage(u.Name)))
-	if err != nil {
-		fmt.Printf("%s\n", err)
-		return
-	}
-	return
-}
-
-func getUserInfo(user string) *slack.User {
-	u, err := slackClient.GetUserInfo(user)
-	if err != nil {
-		fmt.Println("error fetching user info")
-	}
-	return u
-}
-
-func logUserInfo(user string) {
-	u := getUserInfo(user)
-	fmt.Println("############################################################")
-	fmt.Println(u.Name)
-	fmt.Println("############################################################")
+	return 0
 }
