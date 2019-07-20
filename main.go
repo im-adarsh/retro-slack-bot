@@ -16,7 +16,7 @@ import (
 // https://api.slack.com/internal-integrations
 type envConfig struct {
 	// Port is server port to be listened.
-	Port string `envconfig:"PORT" default:"3000"`
+	Port string `envconfig:"PORT" default:"80"`
 
 	// BotToken is bot user token to access to slack API.
 	BotToken string `envconfig:"BOT_TOKEN" required:"true"`
