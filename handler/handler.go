@@ -84,7 +84,7 @@ func (botHandler) SelectOption(w http.ResponseWriter, r *http.Request) {
 	case retro.HISTORY_RETRO_SHOW_LAST:
 		fmt.Println("HISTORY : ", action)
 		title := ":ok: showing last retro!"
-		responseMessage(w, message.OriginalMessage, title, "")
+		showRetroDialogMessage(w, message.OriginalMessage, title, "")
 		return
 	}
 
@@ -108,6 +108,27 @@ func responseMessage(w http.ResponseWriter, original slack.Message, title, value
 		},
 	}
 
+	w.Header().Add("Content-type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(&original)
+}
+
+func showRetroDialogMessage(w http.ResponseWriter, original slack.Message, title, value string) {
+	original.Attachments[0].Actions = []slack.AttachmentAction{}
+	original.Type = "dialog"
+	original.Attachments[0].Fields = []slack.AttachmentField{
+		{
+			Title: "Whats went well ?",
+			Value: "",
+			Short: false,
+		},
+		{
+			Title: "Things to be improved ?",
+			Value: "",
+			Short: false,
+		},
+	}
+	original.Type = "textarea"
 	w.Header().Add("Content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(&original)

@@ -39,6 +39,18 @@ func (s *slackListener) ListenAndResponse() {
 			if err := s.handleMessageEvent(ev); err != nil {
 				log.Printf("[ERROR] Failed to handle message: %s", err)
 			}
+		case *slack.PresenceChangeEvent:
+			fmt.Printf("Presence Change: %v\n", ev)
+
+		case *slack.LatencyReport:
+			fmt.Printf("Current latency: %v\n", ev.Value)
+
+		case *slack.RTMError:
+			fmt.Printf("Error: %s\n", ev.Error())
+
+		case *slack.InvalidAuthEvent:
+			fmt.Printf("Invalid credentials")
+			return
 		}
 	}
 }
@@ -52,7 +64,7 @@ func (s *slackListener) handleMessageEvent(ev *slack.MessageEvent) error {
 	u := s.user.GetUserInfo(ev.Msg.User)
 	_, _, err := s.client.PostMessage(ev.Channel,
 		slack.MsgOptionAsUser(true),
-		slack.MsgOptionAttachments(retro.GetInitRetroMessage(u.Name), retro.ShowRetroHistoryMessage(u.Name)))
+		slack.MsgOptionAttachments(retro.GetInitRetroMessage(u.Name)))
 	if err != nil {
 		fmt.Printf("%s\n", err)
 	}

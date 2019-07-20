@@ -28,6 +28,23 @@ func GetInitRetroMessage(username string) slack.Attachment {
 			{Name: "sprint", Text: "End Retro", Type: "button", Value: INIT_RETRO_END},
 			{Name: "sprint", Text: "Discard Retro", Type: "button", Value: INIT_RETRO_DISCARD, Style: "danger"},
 			{Name: "sprint", Text: "Skip Retro", Type: "button", Value: INIT_RETRO_SKIP},
+			{Name: "sprint", Text: "Show Last Retro", Type: "button", Value: HISTORY_RETRO_SHOW_LAST},
+		},
+	}
+}
+
+func ShowRetroDialogMessage(username string) slack.Attachment {
+	return slack.Attachment{
+		Text:       fmt.Sprintf("Hey @%s! Please choose what you want to do below : ", username),
+		Color:      "#3AA3E3",
+		Fallback:   "You are unable to choose an action",
+		CallbackID: INIT_CALLBACK_ID,
+		Actions: []slack.AttachmentAction{
+			{Name: "sprint", Text: "Start Retro", Type: "button", Value: INIT_RETRO_START, Style: "primary"},
+			{Name: "sprint", Text: "End Retro", Type: "button", Value: INIT_RETRO_END},
+			{Name: "sprint", Text: "Discard Retro", Type: "button", Value: INIT_RETRO_DISCARD, Style: "danger"},
+			{Name: "sprint", Text: "Skip Retro", Type: "button", Value: INIT_RETRO_SKIP},
+			{Name: "sprint", Text: "Show Last Retro", Type: "button", Value: HISTORY_RETRO_SHOW_LAST},
 		},
 	}
 }
