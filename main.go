@@ -25,8 +25,7 @@ func main() {
 			go handleMessage(ev)
 		case *slack.AttachmentAction:
 			go handleCallback(ev)
-		case :
-			
+
 		default:
 			fmt.Println()
 		}
